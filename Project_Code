@@ -1,0 +1,222 @@
+#class for patient data
+class Patient:
+    def __init__(self, first_name, middle_name, last_name, address, city, state, zip_code, phone, emergency_contact, emergency_phone):
+        #all patient info
+        self.first_name = first_name  #first name
+        self.middle_name = middle_name  #middle name
+        self.last_name = last_name  #last name
+        self.address = address  #address
+        self.city = city  #city of patient
+        self.state = state  #state where patient lives
+        self.zip_code = zip_code  #ZIP code
+        self.phone = phone  #phone number
+        self.emergency_contact = emergency_contact  #name of emergency contact
+        self.emergency_phone = emergency_phone  #phone number of emergency contact
+
+
+
+
+    #accessors for each patient class attribute
+    def get_first_name(self):
+        return self.first_name
+
+
+    def get_middle_name(self):
+        return self.middle_name
+
+
+    def get_last_name(self):
+        return self.last_name
+
+
+    def get_address(self):
+        return self.address
+
+
+    def get_city(self):
+        return self.city
+
+
+    def get_state(self):
+        return self.state
+
+
+    def get_zip_code(self):
+        return self.zip_code
+
+
+    def get_phone(self):
+        return self.phone
+
+
+    def get_emergency_phone(self):
+        return self.emergency_phone
+
+
+    def get_emergency_contact(self):
+        return self.emergency_contact
+
+
+
+
+    #mutator to update each patient attribute
+    def set_first_name(self, first_name):
+        self.first_name = first_name
+
+
+    def set_middle(self, middle_name):
+        self.middle_name = middle_name
+
+
+    def set_last(self, last_name):
+        self.last_name = last_name
+
+
+    def set_address(self, address):
+        self.address = address
+
+
+    def set_city(self, city):
+        self.city = city
+
+
+    def set_state(self, state):
+        self.state = state
+
+
+    def set_zip_code(self, zip_code):
+        self.zip_code = zip_code
+
+
+    def set_phone(self, phone):
+        self.phone = phone
+
+
+    def set_emergency_contact(self, emergency_contact):
+        self.emergency_contact = emergency_contact
+
+
+    def set_emergency_phone(self, emergency_phone):
+        self.emergency_phone = emergency_phone
+
+
+
+
+    #list to represent patient information
+    def __str__(self):
+        return (f"First Name: {self.first_name}\n"
+                f"Middle Name: {self.middle_name}\n"
+                f"Last Name: {self.last_name}\n"
+                f"Address: {self.address}\n"
+                f"City: {self.city}\n"
+                f"State: {self.state}\n"
+                f"ZIP: {self.zip_code}\n"
+                f"Phone: {self.phone}\n"
+                f"Emergency Contact: {self.emergency_contact}\n"
+                f"Emergency Phone: {self.emergency_phone}")
+
+
+
+
+#class to represent medical procedure performed on a patient
+class Procedure:
+    def __init__(self, name, date, practitioner, charge):
+        #procedure information
+        self.name = name #name of procedure
+        self.date = date #date of procedure
+        self.practitioner = practitioner  #name of the practitioner who performed the procedure
+        self.charge = charge  #cost of procedure
+
+
+
+
+    #accessor for each procedure attribute
+    def get_name(self):
+        return self.name
+
+
+    def get_date(self):
+        return self.date
+
+
+    def get_practitioner(self):
+        return self.practitioner
+
+
+    def get_charge(self):
+        return self.charge
+
+
+    #mutator method to update each procedure attribute
+    def set_name(self, name):
+        self.name = name
+
+
+    def set_date(self, date):
+        self.date = date
+
+
+    def set_practitioner(self, practitioner):
+        self.practitioner = practitioner
+
+
+    def set_charge(self, charge):
+        self.charge = charge
+
+
+
+
+    #list of procedure information
+    def __str__(self):
+        return (f"Procedure: {self.name}\n"
+                f"Date: {self.date}\n"
+                f"Practitioner: {self.practitioner}\n"
+                f"Charge: {self.charge:.2f}")
+
+
+
+
+#patient function of all patient data from syllabus
+patient = Patient(
+    first_name="James",
+    middle_name="Edward",
+    last_name="Jones",
+    address="123 Main Street",
+    city="Billings",
+    state="Montana",
+    zip_code="59000",
+    phone="406-555-1212",
+    emergency_contact="Jenny Jones",
+    emergency_phone="406-555-1213"
+)
+
+
+
+
+#make three procedure functions with data from syllabus
+procedure1 = Procedure("Physical Exam", "11-24-2024", "Dr. Irvine", 250.00)
+procedure2 = Procedure("X-ray", "11-24-2024", "Dr. Jamison", 500.00)
+procedure3 = Procedure("Blood Test", "11-24-2024", "Dr. Smith", 200.00)
+
+
+
+
+#show patient information
+print(patient)
+print()  #empty line for better readability
+
+
+
+
+#show the information for each procedure
+print(procedure1)
+print()  #empty lines for space in between information
+print(procedure2)
+print()  
+print(procedure3)
+print()
+
+
+#calculate and show charge for procedure
+total_charges = procedure1.charge + procedure2.charge + procedure3.charge
+print(f"Total Charges: {total_charges:.2f}")
