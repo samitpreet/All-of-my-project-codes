@@ -1,0 +1,229 @@
+def norm_date(d): 
+
+    #change m/d/y to y/m/d 
+
+    if '/' not in d: return d 
+
+    m, dd, y = d.split('/') 
+
+    return f"{y}-{m.zfill(2)}-{dd.zfill(2)}"  
+
+ 
+
+def write_csv(path, head, rows): 
+
+#csv writer 
+
+    with open(path, 'w', encoding='utf-8') as f: 
+
+        f.write(','.join(head) + '\n') 
+
+        for r in rows: 
+
+            cells = [ '' if v is None else str(v) for v in r ] 
+
+            f.write(','.join(cells) + '\n') 
+
+ 
+
+def read_rows(path, n): 
+
+   #read rows from file 
+
+   #skip header 
+
+    L = open(path, encoding='utf-8').read().splitlines()[1:] 
+
+    out = [] 
+
+    for line in L: 
+
+        s = line.strip().replace('No-sho w', 'No-show') 
+
+        if not s: continue   
+
+        #skip empty lines 
+
+        toks = s.split('\t') if '\t' in s else s.split()   
+
+        if len(toks) >= n:   
+
+            #only keep rows with enough columns 
+
+            out.append(toks[:n]) 
+
+    return out 
+
+ 
+
+def parse_patients(path): 
+
+    #search patient records 
+
+    rows = [] 
+
+    for p in read_rows(path, 6): 
+
+        #Find DOB 
+
+        dob_i = next((i for i,t in enumerate(p) if '/' in t), None) 
+
+        if dob_i is None:  
+
+            #if no DOB 
+
+            pid, first, last, dob, gender, zipc = (p + ['']*6)[:6] 
+
+        else:  
+
+            pid = p[0]; first = p[1] if len(p)>1 else '' 
+
+            last = ' '.join(p[2:dob_i])  
+
+         #combine entire name 
+
+            dob = p[dob_i] 
+
+            gender = p[dob_i+1] if len(p)>dob_i+1 else '' 
+
+            zipc = p[dob_i+2] if len(p)>dob_i+2 else '' 
+
+        rows.append((pid.strip(), first.strip(), last.strip(), norm_date(dob), gender.strip(), zipc.strip())) 
+
+    return rows 
+
+ 
+
+def parse_appointments(path): 
+
+    #get info from appointment records 
+
+    return [ (a[0].strip(), a[1].strip(), norm_date(a[2].strip()), a[3].strip(), a[4].strip().replace('No-sho w','No-show'), a[5].strip()) 
+
+             for a in read_rows(path,6) ] 
+
+ 
+
+def parse_incidents(path): 
+
+    #get info from incident records 
+
+    return [ (i[0].strip(), i[1].strip(), norm_date(i[2].strip()), i[3].strip(), i[4].strip(), i[5].strip()) 
+
+             for i in read_rows(path,6) ] 
+
+ 
+
+def build(base): 
+
+#start etl process 
+
+    #path joiner 
+
+    j = lambda n: base + ('\\' if '\\' in base else '/') + n if base and base!='.' else n 
+
+     
+
+    #search txt files 
+
+    P = parse_patients(j('Patients.txt')) 
+
+    A = parse_appointments(j('Appointment.txt')) 
+
+    I = parse_incidents(j('IncidentLogs.txt')) 
+
+ 
+
+    #find distinct values 
+
+    uniq = lambda seq: list(dict.fromkeys(seq)) 
+
+ 
+
+    #make dimension tables   
+
+    #find unique data 
+
+    dates = uniq([a[2] for a in A] + [i[2] for i in I]) 
+
+     
+
+    #get date 
+
+    dim_date = [(d, d[-2:], d[5:7], d[:4]) for d in dates] 
+
+     
+
+    #get other dimensions 
+
+    clinics = [(c,) for c in uniq([a[0] for a in A] + [i[1] for i in I])] 
+
+    subjects = [(s,) for s in uniq([a[1] for a in A])]  
+
+    bookings = [(b,) for b in uniq([a[5] for a in A])]   
+
+    statuses = [(s,) for s in uniq([a[4] for a in A])]   
+
+    itypes = [(t,) for t in uniq([i[4] for i in I])]     
+
+    shifts = [(s,) for s in uniq([i[3] for i in I])]    
+
+    dim_appt = [ (a[1],'','',a[0],a[1],a[2],a[3],a[4],a[5]) for a in A ] 
+
+     
+
+    #fact table for appointments 
+
+    fact_apps = [ (a[1],a[0],a[2],a[3],a[4],a[5]) for a in A ] 
+
+ 
+
+    #write dimension tables 
+
+    write_csv(j('dim_patient.csv'), ['patient_id','first_name','last_name','dob','gender','zip'], P) 
+
+    write_csv(j('dim_date.csv'), ['date','day','month','year'], dim_date) 
+
+    write_csv(j('dim_clinic.csv'), ['clinic_id'], clinics) 
+
+    write_csv(j('dim_subject.csv'), ['subject_id'], subjects) 
+
+    write_csv(j('dim_booking_method.csv'), ['booking_method'], bookings) 
+
+    write_csv(j('dim_status.csv'), ['status'], statuses) 
+
+    write_csv(j('dim_incident_type.csv'), ['incident_type'], itypes) 
+
+    write_csv(j('dim_shift.csv'), ['shift'], shifts) 
+
+    write_csv(j('dim_incident.csv'), ['incident_id','clinic_id','date','shift','incident_type','notes'], I) 
+
+    write_csv(j('dim_appointment.csv'), ['appointment_id','patient_id','provider_id','clinic_id','service_id','date','time','status','booking_method'], dim_appt) 
+
+ 
+
+    #write fact tables 
+
+    write_csv(j('fact_appointments.csv'), ['appointment_id','clinic_id','date','time','status','booking_method'], fact_apps) 
+
+    write_csv(j('fact_incidents.csv'), ['incident_id','clinic_id','date','shift','incident_type','notes'], I) 
+
+ 
+
+if __name__ == '__main__': 
+
+    #find directory 
+
+    bf = globals().get('__file__', None) 
+
+    if not bf: base='.'   
+
+    else: 
+
+        sep='\\' if '\\' in bf else '/'  
+
+        i=bf.rfind(sep); base = bf[:i] if i!=-1 else '.'   
+
+        #get directory 
+
+    build(base) 
