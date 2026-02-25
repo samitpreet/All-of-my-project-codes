@@ -1,0 +1,941 @@
+-- Dropping previously created tables if exist 
+
+IF OBJECT_ID('Clinic_FACT') IS NOT NULL DROP TABLE Clinic_FACT; 
+
+IF OBJECT_ID('IncidentLogs_DIM') IS NOT NULL DROP TABLE IncidentLogs_DIM; 
+
+IF OBJECT_ID('Inventory_DIM') IS NOT NULL DROP TABLE Inventory_DIM; 
+
+IF OBJECT_ID('Appointment_DIM') IS NOT NULL DROP TABLE Appointment_DIM; 
+
+IF OBJECT_ID('Patient_DIM') IS NOT NULL DROP TABLE Patient_DIM; 
+
+IF OBJECT_ID('HealthService_DIM') IS NOT NULL DROP TABLE HealthService_DIM; 
+
+IF OBJECT_ID('HealthProvider_DIM') IS NOT NULL DROP TABLE HealthProvider_DIM; 
+
+IF OBJECT_ID('Clinic_DIM') IS NOT NULL DROP TABLE Clinic_DIM; 
+
+IF OBJECT_ID('IncidentLogs') IS NOT NULL DROP TABLE IncidentLogs; 
+
+IF OBJECT_ID('Inventory') IS NOT NULL DROP TABLE Inventory; 
+
+IF OBJECT_ID('Appointment') IS NOT NULL DROP TABLE Appointment; 
+
+IF OBJECT_ID('Patient') IS NOT NULL DROP TABLE Patient; 
+
+IF OBJECT_ID('HealthService') IS NOT NULL DROP TABLE HealthService; 
+
+IF OBJECT_ID('HealthProvider') IS NOT NULL DROP TABLE HealthProvider; 
+
+IF OBJECT_ID('Clinic') IS NOT NULL DROP TABLE Clinic; 
+
+ 
+
+-- ERD Database 
+
+CREATE TABLE Clinic( 
+
+ClinicID NVARCHAR(50) PRIMARY KEY, 
+
+CLinicName NVARCHAR(50), 
+
+ClinicStreet NVARCHAR(50), 
+
+ClinicCity NVARCHAR(50), 
+
+ClinicState NVARCHAR(50), 
+
+ClinicZipCode NVARCHAR(50) 
+
+); 
+
+ 
+
+CREATE TABLE HealthProvider( 
+
+ProviderID NVARCHAR(50) PRIMARY KEY, 
+
+ProviderName NVARCHAR(50), 
+
+Specialty NVARCHAR(50), 
+
+ClinicID NVARCHAR(50), 
+
+FOREIGN KEY (ClinicID) REFERENCES Clinic(ClinicID) 
+
+); 
+
+ 
+
+CREATE TABLE HealthService( 
+
+ServiceID NVARCHAR(50) PRIMARY KEY, 
+
+ServiceName NVARCHAR(50), 
+
+ServicePrice DECIMAL(10,2) 
+
+); 
+
+ 
+
+CREATE TABLE Patient( 
+
+PatientID NVARCHAR(50) PRIMARY KEY, 
+
+PatientFName NVARCHAR(50), 
+
+PatientLName NVARCHAR(50), 
+
+PatientDOB NVARCHAR(50), 
+
+PatientGender NVARCHAR(50), 
+
+PatientEmail NVARCHAR(50), 
+
+PatientZipCode NVARCHAR(50), 
+
+PatientPrimaryPhone NVARCHAR(50) 
+
+); 
+
+ 
+
+CREATE TABLE Appointment( 
+
+AppointmentID NVARCHAR(50) PRIMARY KEY, 
+
+PatientID NVARCHAR(50) NOT NULL, 
+
+ProviderID NVARCHAR(50) NOT NULL, 
+
+ClinicID NVARCHAR(50) NOT NULL, 
+
+ServiceID NVARCHAR(50) NOT NULL, 
+
+AptDate DATE NOT NULL, 
+
+AptTime TIME NOT NULL, 
+
+AptStatus NVARCHAR(50), 
+
+BookingMethod NVARCHAR(50), 
+
+AptBilling Decimal(10,2), 
+
+FOREIGN KEY (PatientID) REFERENCES Patient(PatientID), 
+
+FOREIGN KEY (ProviderID) REFERENCES HealthProvider(ProviderID), 
+
+FOREIGN KEY (ClinicID) REFERENCES Clinic(ClinicID), 
+
+FOREIGN KEY (ServiceID) REFERENCES HealthService(ServiceID) 
+
+); 
+
+ 
+
+CREATE TABLE Inventory( 
+
+IventoryID NVARCHAR(50) PRIMARY KEY, 
+
+ClinicID NVARCHAR(50), 
+
+ItemName NVARCHAR(50), 
+
+QuantityAvailable INT, 
+
+QuantityUsed INT, 
+
+QuantityWasted INT, 
+
+InventoryDate DATE, 
+
+FOREIGN KEY (ClinicID) REFERENCES Clinic(ClinicID) 
+
+); 
+
+ 
+
+CREATE TABLE IncidentLogs( 
+
+IncidentID NVARCHAR(50) PRIMARY KEY, 
+
+ClinicID NVARCHAR(50), 
+
+IncidentDate DATE, 
+
+IncidentShift NVARCHAR(20), 
+
+IncidentType NVARCHAR(50), 
+
+IncidentNotes NVARCHAR(50), 
+
+FOREIGN KEY (ClinicID) REFERENCES Clinic(ClinicID) 
+
+); 
+
+ 
+
+-- Populate Tables 
+
+INSERT INTO Clinic(ClinicID, ClinicName, ClinicStreet, ClinicCity, ClinicState, ClinicZipCode) 
+
+VALUES 
+
+('CD001', 'TAPED', '123 Maplewood Drive', 'Ridgefield', 'WA', '98642'), 
+
+('CD002', 'TAPED', '456 Cedar Lane', 'Ridgefield', 'WA', '98642'), 
+
+('CD003', 'TAPED', '789 Oakcrest Avenue', 'Ridgefield', 'WA', '98642'), 
+
+('CD004', 'TAPED', '321 Pineview Court', 'Ridgefield', 'WA', '98642'); 
+
+ 
+
+INSERT INTO HealthProvider(ProviderID, ProviderName, Specialty, ClinicID) 
+
+VALUES 
+
+('P001', 'Dr. Lee', 'Family Medicine', 'CD001'), 
+
+('P002', 'Dr. Patel', 'Pediatrics', 'CD002'), 
+
+('P003', 'Dr. Chen', 'Internal Medicine', 'CD003'), 
+
+('P004', 'NP Johnson', 'Nurse Practitioner', 'CD002'), 
+
+('P005', 'Dr. Garcia', 'Family Medicine', 'CD004'), 
+
+('P006', 'Dr. Nguyen', 'Preventive Care', 'CD002'), 
+
+('P007', 'Dr. Smith', 'Pediatrics', 'CD002'), 
+
+('P008', 'Dr. Allen', 'Family Medicine', 'CD002'), 
+
+('P009', 'RN Davis', 'Nurse Practitioner', 'CD004'), 
+
+('P010', 'Dr. Roberts', 'Chronic Care', 'CD004'), 
+
+('P011', 'RN Flores', 'Nurse Practitioner', 'CD002'), 
+
+('P012', 'Dr. Adams', 'Preventive Care', 'CD001'); 
+
+ 
+
+INSERT INTO HealthService(ServiceID, ServiceName, ServicePrice) 
+
+VALUES 
+
+('S001', 'General Checkup', 85), 
+
+('S002', 'Vaccination', 35), 
+
+('S003', 'Blood Test', 45), 
+
+('S004', 'Health Screening', 75), 
+
+('S005', 'Chronic Care Follow-Up', 90), 
+
+('S006', 'Wellness Counseling', 60); 
+
+ 
+
+INSERT INTO Patient(PatientID, PatientFName, PatientLName, PatientDOB, PatientGender, PatientZipCode) 
+
+VALUES 
+
+('PT001', 'Maria', 'Davis', '1994-07-04', 'F', '98642'), 
+
+('PT002', 'Sophia', 'Davis', '1973-12-11', 'M', '98663'), 
+
+('PT003', 'Emily', 'Davis', '1973-12-10', 'M', '98660'), 
+
+('PT004', 'Maria', 'Martinez', '1998-05-24', 'M', '98642'), 
+
+('PT005', 'James', 'Nguyen', '2002-11-01', 'F', '98661'), 
+
+('PT006', 'Ava', 'Lee', '1970-06-07', 'F', '98604'), 
+
+('PT007', 'John', 'Davis', '2010-01-14', 'M', '98664'), 
+
+('PT008', 'Sophia', 'Davis', '1975-02-13', 'F', '98642'), 
+
+('PT009', 'David', 'Martinez', '1999-07-01', 'M', '98629'), 
+
+('PT010', 'Sara', 'Martinez', '2005-01-24', 'F', '98642'), 
+
+('PT011', 'Alice', 'Martinez', '1984-01-10', 'F', '98683'), 
+
+('PT012', 'John', 'Lee', '1993-12-04', 'F', '98607'), 
+
+('PT013', 'Emily', 'Taylor', '1951-09-10', 'F', '98665'), 
+
+('PT014', 'David', 'Lee', '1951-07-06', 'M', '98674'), 
+
+('PT015', 'Ethan', 'Clark', '1986-07-23', 'M', '98642'), 
+
+('PT016', 'Alice', 'Garcia', '1996-12-27', 'F', '98642'), 
+
+('PT017', 'Maria', 'Johnson', '1998-07-21', 'F', '98662'), 
+
+('PT018', 'Sara', 'Perez', '1993-12-03', 'M', '98642'), 
+
+('PT019', 'Ava', 'Lee', '1958-11-21', 'M', '98671'), 
+
+('PT020', 'Ava', 'Garcia', '1996-06-14', 'F', '98684'), 
+
+('PT021', 'Ethan', 'Johnson', '1988-04-23', 'F', '98685'), 
+
+('PT022', 'Emily', 'Nguyen', '1986-02-13', 'F', '98642'), 
+
+('PT023', 'Daniel', 'Johnson', '2007-03-12', 'M', '98661'), 
+
+('PT024', 'Maria', 'Clark', '1984-11-21', 'F', '98660'), 
+
+('PT025', 'Emily', 'Johnson', '1952-10-28', 'M', '98642'), 
+
+('PT026', 'Daniel', 'Clark', '1956-12-02', 'F', '98664'), 
+
+('PT027', 'Michael', 'Perez', '1975-11-23', 'F', '98663'), 
+
+('PT028', 'Ava', 'Nguyen', '1983-09-19', 'M', '98642'), 
+
+('PT029', 'James', 'Johnson', '1950-05-28', 'M', '98642'), 
+
+('PT030', 'Ethan', 'Johnson', '1970-07-03', 'M', '98682'), 
+
+('PT031', 'Ethan', 'Martinez', '1964-12-22', 'F', '98642'), 
+
+('PT032', 'Daniel', 'Johnson', '1970-09-05', 'F', '98665'), 
+
+('PT033', 'Robert', 'Johnson', '1996-10-10', 'F', '98604'), 
+
+('PT034', 'Robert', 'Brown', '1972-04-12', 'M', '98642'), 
+
+('PT035', 'Robert', 'Lee', '1987-06-14', 'M', '98674'), 
+
+('PT036', 'Isabella', 'Perez', '1965-05-25', 'F', '98661'), 
+
+('PT037', 'Ethan', 'Taylor', '1976-06-02', 'M', '98642'), 
+
+('PT038', 'Daniel', 'Wilson', '1970-01-18', 'F', '98660'), 
+
+('PT039', 'David', 'Clark', '1957-09-14', 'M', '98671'), 
+
+('PT040', 'James', 'Martinez', '2006-08-01', 'F', '98642'), 
+
+('PT041', 'Maria', 'Davis', '1956-11-09', 'M', '98642'), 
+
+('PT042', 'David', 'Clark', '1969-03-03', 'M', '98663'), 
+
+('PT043', 'Ethan', 'Nguyen', '1964-10-06', 'F', '98642'), 
+
+('PT044', 'Emily', 'Martinez', '1986-07-10', 'F', '98629'), 
+
+('PT045', 'John', 'Taylor', '1956-06-16', 'M', '98683'), 
+
+('PT046', 'Isabella', 'Smith', '1976-12-22', 'M', '98642'), 
+
+('PT047', 'Olivia', 'Smith', '1974-03-09', 'M', '98662'), 
+
+('PT048', 'James', 'Davis', '1966-02-19', 'F', '98642'), 
+
+('PT049', 'Daniel', 'Garcia', '1986-02-14', 'M', '98684'), 
+
+('PT050', 'David', 'Lee', '1984-11-18', 'F', '98642'), 
+
+('PT051', 'Sophia', 'Taylor', '1973-04-17', 'F', '98607'), 
+
+('PT052', 'Sophia', 'Perez', '1982-12-27', 'M', '98665'), 
+
+('PT053', 'David', 'Davis', '1996-11-14', 'F', '98642'), 
+
+('PT054', 'Daniel', 'Davis', '2006-05-04', 'M', '98642'), 
+
+('PT055', 'Olivia', 'Taylor', '1972-07-26', 'M', '98660'), 
+
+('PT056', 'James', 'Clark', '1987-03-07', 'M', '98663'), 
+
+('PT057', 'Michael', 'Taylor', '1988-06-12', 'M', '98642'), 
+
+('PT058', 'Emily', 'Clark', '1964-01-19', 'M', '98671'), 
+
+('PT059', 'Sophia', 'Johnson', '2008-01-24', 'M', '98642'), 
+
+('PT060', 'David', 'Garcia', '1987-11-12', 'F', '98661'), 
+
+('PT061', 'Olivia', 'Clark', '1961-04-02', 'M', '98642'), 
+
+('PT062', 'Robert', 'Brown', '1965-04-24', 'M', '98682'), 
+
+('PT063', 'Maria', 'Clark', '1965-04-06', 'M', '98642'), 
+
+('PT064', 'Ava', 'Garcia', '1978-07-13', 'F', '98642'), 
+
+('PT065', 'James', 'Wilson', '1960-06-04', 'F', '98674'), 
+
+('PT066', 'Alice', 'Smith', '1967-06-22', 'M', '98642'), 
+
+('PT067', 'Daniel', 'Perez', '1997-05-28', 'M', '98685'), 
+
+('PT068', 'Daniel', 'Garcia', '1964-11-04', 'F', '98664'), 
+
+('PT069', 'Daniel', 'Nguyen', '1973-11-06', 'M', '98642'), 
+
+('PT070', 'Sophia', 'Perez', '1979-11-10', 'F', '98642'), 
+
+('PT071', 'James', 'Smith', '1950-09-06', 'F', '98660'), 
+
+('PT072', 'Isabella', 'Perez', '1998-05-03', 'M', '98642'), 
+
+('PT073', 'Sophia', 'Clark', '1980-12-28', 'M', '98662'), 
+
+('PT074', 'Ava', 'Perez', '2006-02-28', 'F', '98642'), 
+
+('PT075', 'Isabella', 'Garcia', '1990-06-20', 'F', '98642'), 
+
+('PT076', 'James', 'Clark', '2009-03-10', 'F', '98663'), 
+
+('PT077', 'Sophia', 'Davis', '1971-12-11', 'M', '98604'), 
+
+('PT078', 'Ava', 'Brown', '1984-06-04', 'M', '98642'), 
+
+('PT079', 'Isabella', 'Perez', '1953-12-11', 'M', '98642'), 
+
+('PT080', 'Isabella', 'Lee', '1956-10-13', 'M', '98661'), 
+
+('PT081', 'James', 'Clark', '1990-02-11', 'F', '98642'), 
+
+('PT082', 'John', 'Garcia', '2004-02-09', 'M', '98665'), 
+
+('PT083', 'Michael', 'Smith', '1955-05-16', 'F', '98642'), 
+
+('PT084', 'Olivia', 'Perez', '1981-01-14', 'M', '98629'), 
+
+('PT085', 'Alice', 'Johnson', '1964-12-26', 'M', '98642'), 
+
+('PT086', 'Olivia', 'Garcia', '1959-11-04', 'F', '98683'), 
+
+('PT087', 'David', 'Clark', '1955-01-02', 'F', '98642'), 
+
+('PT088', 'Daniel', 'Wilson', '2005-02-03', 'M', '98642'), 
+
+('PT089', 'John', 'Lee', '1956-02-07', 'M', '98607'), 
+
+('PT090', 'Isabella', 'Martinez', '1966-03-24', 'M', '98642'), 
+
+('PT091', 'Daniel', 'Taylor', '1965-08-25', 'F', '98642'), 
+
+('PT092', 'John', 'Lee', '1974-07-12', 'M', '98671'), 
+
+('PT093', 'John', 'Smith', '1998-10-14', 'F', '98642'), 
+
+('PT094', 'Sara', 'Davis', '1963-02-24', 'M', '98642'), 
+
+('PT095', 'Emily', 'Brown', '1962-03-15', 'M', '98642'), 
+
+('PT096', 'Daniel', 'Martinez', '1971-12-10', 'F', '98684'), 
+
+('PT097', 'Michael', 'Davis', '1967-12-21', 'F', '98642'), 
+
+('PT098', 'James', 'Johnson', '1988-03-14', 'M', '98642'), 
+
+('PT099', 'Sara', 'Taylor', '1950-03-16', 'F', '98663'), 
+
+('PT100', 'Maria', 'Garcia', '1998-09-25', 'F', '98660'); 
+
+ 
+
+INSERT INTO Appointment(AppointmentID, PatientID, ProviderID, ClinicID, ServiceID, AptDate, AptTime, AptStatus, BookingMethod, AptBilling) 
+
+VALUES 
+
+('A001', 'PT062', 'P002', 'CD002', 'S002', '2025-08-01', '14:30:00', 'Cancelled', 'Online Portal', 35), 
+
+('A002', 'PT047', 'P002', 'CD002', 'S002', '2025-08-04', '08:00:00', 'Completed', 'Call-in System', 35), 
+
+('A003', 'PT051', 'P008', 'CD002', 'S001', '2025-08-05', '08:00:00', 'No-show', 'Call-in System', 85), 
+
+('A004', 'PT089', 'P010', 'CD004', 'S004', '2025-08-06', '16:00:00', 'Completed', 'Call-in System', 75), 
+
+('A005', 'PT054', 'P003', 'CD003', 'S005', '2025-08-07', '09:30:00', 'Completed', 'Online Portal', 90), 
+
+('A006', 'PT093', 'P008', 'CD002', 'S004', '2025-08-08', '14:30:00', 'Completed', 'Online Portal', 75), 
+
+('A007', 'PT008', 'P012', 'CD001', 'S003', '2025-08-11', '16:00:00', 'No-show', 'Call-in System', 45), 
+
+('A008', 'PT075', 'P002', 'CD002', 'S001', '2025-08-12', '11:00:00', 'Completed', 'Call-in System', 85), 
+
+('A009', 'PT001', 'P001', 'CD001', 'S001', '2025-08-13', '11:00:00', 'Completed', 'Call-in System', 85), 
+
+('A010', 'PT076', 'P011', 'CD002', 'S001', '2025-08-14', '09:30:00', 'No-show', 'Online Portal', 85), 
+
+('A011', 'PT095', 'P006', 'CD002', 'S005', '2025-08-15', '13:00:00', 'No-show', 'Call-in System', 90), 
+
+('A012', 'PT005', 'P008', 'CD002', 'S001', '2025-08-18', '16:00:00', 'Completed', 'Call-in System', 85), 
+
+('A013', 'PT086', 'P005', 'CD004', 'S004', '2025-08-19', '09:30:00', 'No-show', 'Call-in System', 75), 
+
+('A014', 'PT012', 'P005', 'CD004', 'S006', '2025-08-20', '16:00:00', 'Completed', 'Online Portal', 60), 
+
+('A015', 'PT015', 'P005', 'CD004', 'S001', '2025-08-21', '13:00:00', 'Completed', 'Call-in System', 85), 
+
+('A016', 'PT014', 'P008', 'CD002', 'S002', '2025-08-22', '08:00:00', 'Completed', 'Call-in System', 35), 
+
+('A017', 'PT078', 'P005', 'CD004', 'S001', '2025-08-25', '13:00:00', 'Completed', 'Online Portal', 85), 
+
+('A018', 'PT063', 'P003', 'CD003', 'S001', '2025-08-26', '13:00:00', 'Cancelled', 'Call-in System', 85), 
+
+('A019', 'PT092', 'P003', 'CD003', 'S003', '2025-08-27', '09:30:00', 'Completed', 'Call-in System', 45), 
+
+('A020', 'PT047', 'P011', 'CD002', 'S004', '2025-08-28', '14:30:00', 'Completed', 'Call-in System', 75), 
+
+('A021', 'PT094', 'P004', 'CD002', 'S005', '2025-08-29', '13:00:00', 'No-show', 'Online Portal', 90), 
+
+('A022', 'PT089', 'P010', 'CD004', 'S006', '2025-09-01', '11:00:00', 'Completed', 'Online Portal', 60), 
+
+('A023', 'PT019', 'P007', 'CD002', 'S005', '2025-09-02', '13:00:00', 'Cancelled', 'Online Portal', 90), 
+
+('A024', 'PT096', 'P009', 'CD004', 'S002', '2025-09-03', '14:30:00', 'No-show', 'Online Portal', 35), 
+
+('A025', 'PT056', 'P003', 'CD003', 'S005', '2025-09-04', '09:30:00', 'Completed', 'Online Portal', 90), 
+
+('A026', 'PT054', 'P004', 'CD002', 'S002', '2025-09-05', '11:00:00', 'Cancelled', 'Call-in System', 35), 
+
+('A027', 'PT100', 'P005', 'CD004', 'S005', '2025-09-08', '14:30:00', 'No-show', 'Online Portal', 90), 
+
+('A028', 'PT032', 'P003', 'CD003', 'S004', '2025-09-09', '13:00:00', 'Completed', 'Call-in System', 75), 
+
+('A029', 'PT100', 'P009', 'CD004', 'S001', '2025-09-10', '09:30:00', 'No-show', 'Online Portal', 85), 
+
+('A030', 'PT063', 'P002', 'CD002', 'S002', '2025-09-11', '13:00:00', 'Completed', 'Call-in System', 35), 
+
+('A031', 'PT085', 'P010', 'CD004', 'S006', '2025-09-12', '09:30:00', 'Completed', 'Online Portal', 60), 
+
+('A032', 'PT006', 'P001', 'CD001', 'S002', '2025-09-15', '16:00:00', 'Cancelled', 'Online Portal', 35), 
+
+('A033', 'PT018', 'P012', 'CD001', 'S001', '2025-09-16', '11:00:00', 'No-show', 'Online Portal', 85), 
+
+('A034', 'PT092', 'P001', 'CD001', 'S001', '2025-09-17', '13:00:00', 'No-show', 'Online Portal', 85), 
+
+('A035', 'PT023', 'P007', 'CD002', 'S005', '2025-09-18', '13:00:00', 'Completed', 'Call-in System', 90), 
+
+('A036', 'PT038', 'P011', 'CD002', 'S005', '2025-09-19', '08:00:00', 'Completed', 'Online Portal', 90), 
+
+('A037', 'PT025', 'P004', 'CD002', 'S002', '2025-09-22', '13:00:00', 'Completed', 'Call-in System', 35), 
+
+('A038', 'PT038', 'P001', 'CD001', 'S004', '2025-09-23', '08:00:00', 'Completed', 'Online Portal', 75), 
+
+('A039', 'PT088', 'P001', 'CD001', 'S001', '2025-09-24', '08:00:00', 'Completed', 'Online Portal', 85), 
+
+('A040', 'PT019', 'P012', 'CD001', 'S004', '2025-09-25', '13:00:00', 'Completed', 'Call-in System', 75), 
+
+('A041', 'PT047', 'P003', 'CD003', 'S002', '2025-09-26', '13:00:00', 'Completed', 'Online Portal', 35), 
+
+('A042', 'PT063', 'P011', 'CD002', 'S004', '2025-09-29', '08:00:00', 'Completed', 'Call-in System', 75), 
+
+('A043', 'PT095', 'P003', 'CD003', 'S003', '2025-09-30', '16:00:00', 'No-show', 'Call-in System', 45), 
+
+('A044', 'PT099', 'P012', 'CD001', 'S005', '2025-10-01', '14:30:00', 'Completed', 'Online Portal', 90), 
+
+('A045', 'PT023', 'P008', 'CD002', 'S004', '2025-10-02', '16:00:00', 'Completed', 'Call-in System', 75), 
+
+('A046', 'PT043', 'P003', 'CD003', 'S001', '2025-10-03', '14:30:00', 'Completed', 'Call-in System', 85), 
+
+('A047', 'PT038', 'P002', 'CD002', 'S004', '2025-08-01', '11:00:00', 'Completed', 'Call-in System', 75), 
+
+('A048', 'PT011', 'P011', 'CD002', 'S004', '2025-08-04', '08:00:00', 'Completed', 'Online Portal', 75), 
+
+('A049', 'PT001', 'P011', 'CD002', 'S002', '2025-08-05', '13:00:00', 'Cancelled', 'Call-in System', 35), 
+
+('A050', 'PT031', 'P001', 'CD001', 'S006', '2025-08-06', '11:00:00', 'Cancelled', 'Online Portal', 60), 
+
+('A051', 'PT056', 'P004', 'CD002', 'S003', '2025-08-07', '11:00:00', 'Completed', 'Online Portal', 45), 
+
+('A052', 'PT054', 'P007', 'CD002', 'S006', '2025-08-08', '16:00:00', 'Completed', 'Online Portal', 60), 
+
+('A053', 'PT002', 'P005', 'CD004', 'S005', '2025-08-11', '09:30:00', 'No-show', 'Call-in System', 90), 
+
+('A054', 'PT040', 'P003', 'CD003', 'S003', '2025-08-12', '14:30:00', 'Completed', 'Online Portal', 45), 
+
+('A055', 'PT077', 'P005', 'CD004', 'S004', '2025-08-13', '09:30:00', 'Completed', 'Call-in System', 75), 
+
+('A056', 'PT092', 'P009', 'CD004', 'S002', '2025-08-14', '13:00:00', 'No-show', 'Call-in System', 35), 
+
+('A057', 'PT024', 'P006', 'CD002', 'S005', '2025-08-15', '13:00:00', 'Completed', 'Online Portal', 90), 
+
+('A058', 'PT092', 'P007', 'CD002', 'S004', '2025-08-18', '14:30:00', 'Completed', 'Online Portal', 75), 
+
+('A059', 'PT050', 'P010', 'CD004', 'S003', '2025-08-19', '16:00:00', 'Completed', 'Call-in System', 45), 
+
+('A060', 'PT069', 'P001', 'CD001', 'S001', '2025-08-20', '11:00:00', 'Completed', 'Call-in System', 85), 
+
+('A061', 'PT086', 'P001', 'CD001', 'S006', '2025-08-21', '09:30:00', 'Completed', 'Online Portal', 60), 
+
+('A062', 'PT047', 'P004', 'CD002', 'S004', '2025-08-22', '14:30:00', 'Completed', 'Online Portal', 75), 
+
+('A063', 'PT020', 'P002', 'CD002', 'S004', '2025-08-25', '08:00:00', 'Cancelled', 'Online Portal', 75), 
+
+('A064', 'PT006', 'P007', 'CD002', 'S005', '2025-08-26', '14:30:00', 'No-show', 'Online Portal', 90), 
+
+('A065', 'PT051', 'P002', 'CD002', 'S003', '2025-08-27', '08:00:00', 'Completed', 'Call-in System', 45), 
+
+('A066', 'PT058', 'P010', 'CD004', 'S006', '2025-08-28', '16:00:00', 'Completed', 'Call-in System', 60), 
+
+('A067', 'PT050', 'P002', 'CD002', 'S004', '2025-08-29', '14:30:00', 'Completed', 'Online Portal', 75), 
+
+('A068', 'PT067', 'P008', 'CD002', 'S001', '2025-09-01', '08:00:00', 'No-show', 'Call-in System', 85), 
+
+('A069', 'PT070', 'P005', 'CD004', 'S002', '2025-09-02', '09:30:00', 'Completed', 'Online Portal', 35), 
+
+('A070', 'PT058', 'P002', 'CD002', 'S005', '2025-09-03', '13:00:00', 'Completed', 'Online Portal', 90), 
+
+('A071', 'PT013', 'P012', 'CD001', 'S005', '2025-09-04', '11:00:00', 'No-show', 'Call-in System', 90), 
+
+('A072', 'PT093', 'P010', 'CD004', 'S001', '2025-09-05', '14:30:00', 'Completed', 'Online Portal', 85), 
+
+('A073', 'PT025', 'P002', 'CD002', 'S003', '2025-09-08', '08:00:00', 'Completed', 'Call-in System', 45), 
+
+('A074', 'PT046', 'P006', 'CD002', 'S001', '2025-09-09', '13:00:00', 'No-show', 'Online Portal', 85), 
+
+('A075', 'PT020', 'P007', 'CD002', 'S003', '2025-09-10', '13:00:00', 'Completed', 'Call-in System', 45), 
+
+('A076', 'PT053', 'P009', 'CD004', 'S003', '2025-09-11', '09:30:00', 'Completed', 'Online Portal', 45), 
+
+('A077', 'PT084', 'P009', 'CD004', 'S004', '2025-09-12', '11:00:00', 'Completed', 'Online Portal', 75), 
+
+('A078', 'PT023', 'P002', 'CD002', 'S005', '2025-09-15', '16:00:00', 'Completed', 'Online Portal', 90), 
+
+('A079', 'PT019', 'P007', 'CD002', 'S001', '2025-09-16', '16:00:00', 'Completed', 'Online Portal', 85), 
+
+('A080', 'PT047', 'P011', 'CD002', 'S002', '2025-09-17', '11:00:00', 'Cancelled', 'Call-in System', 35), 
+
+('A081', 'PT008', 'P003', 'CD003', 'S004', '2025-09-18', '08:00:00', 'Completed', 'Call-in System', 75), 
+
+('A082', 'PT091', 'P001', 'CD001', 'S001', '2025-09-19', '09:30:00', 'Completed', 'Online Portal', 85), 
+
+('A083', 'PT019', 'P012', 'CD001', 'S005', '2025-09-22', '14:30:00', 'Completed', 'Online Portal', 90), 
+
+('A084', 'PT040', 'P007', 'CD002', 'S003', '2025-09-23', '08:00:00', 'Completed', 'Online Portal', 45), 
+
+('A085', 'PT032', 'P004', 'CD002', 'S001', '2025-09-24', '11:00:00', 'No-show', 'Call-in System', 85), 
+
+('A086', 'PT095', 'P011', 'CD002', 'S004', '2025-09-25', '16:00:00', 'Completed', 'Online Portal', 75), 
+
+('A087', 'PT053', 'P003', 'CD003', 'S005', '2025-09-26', '11:00:00', 'Completed', 'Call-in System', 90), 
+
+('A088', 'PT092', 'P003', 'CD003', 'S004', '2025-09-29', '09:30:00', 'Completed', 'Call-in System', 75), 
+
+('A089', 'PT086', 'P012', 'CD001', 'S005', '2025-09-30', '16:00:00', 'Completed', 'Call-in System', 90), 
+
+('A090', 'PT093', 'P001', 'CD001', 'S005', '2025-10-01', '13:00:00', 'Completed', 'Online Portal', 90), 
+
+('A091', 'PT087', 'P008', 'CD002', 'S001', '2025-10-02', '09:30:00', 'Cancelled', 'Call-in System', 85), 
+
+('A092', 'PT077', 'P001', 'CD001', 'S006', '2025-10-03', '13:00:00', 'Completed', 'Online Portal', 60), 
+
+('A093', 'PT100', 'P011', 'CD002', 'S005', '2025-09-22', '11:00:00', 'Cancelled', 'Call-in System', 90), 
+
+('A094', 'PT052', 'P004', 'CD002', 'S006', '2025-09-23', '11:00:00', 'Completed', 'Online Portal', 60), 
+
+('A095', 'PT092', 'P007', 'CD002', 'S005', '2025-09-24', '16:00:00', 'Completed', 'Call-in System', 90), 
+
+('A096', 'PT090', 'P001', 'CD001', 'S005', '2025-09-25', '11:00:00', 'Completed', 'Call-in System', 90), 
+
+('A097', 'PT008', 'P002', 'CD002', 'S003', '2025-09-26', '16:00:00', 'Completed', 'Call-in System', 45), 
+
+('A098', 'PT093', 'P007', 'CD002', 'S002', '2025-09-29', '11:00:00', 'Completed', 'Online Portal', 35), 
+
+('A099', 'PT090', 'P011', 'CD002', 'S003', '2025-09-30', '14:30:00', 'Completed', 'Online Portal', 45), 
+
+('A100', 'PT044', 'P003', 'CD003', 'S005', '2025-10-01', '08:00:00', 'No-show', 'Online Portal', 90); 
+
+ 
+
+-- Star Schema 
+
+CREATE TABLE Clinic_DIM( 
+
+ClinicKEY NVARCHAR(50) PRIMARY KEY, 
+
+CLinicName NVARCHAR(50), 
+
+ClinicStreet NVARCHAR(50), 
+
+ClinicCity NVARCHAR(50), 
+
+ClinicState NVARCHAR(50), 
+
+ClinicZipCode NVARCHAR(50) 
+
+); 
+
+ 
+
+CREATE TABLE HealthProvider_DIM( 
+
+ProviderKEY NVARCHAR(50) PRIMARY KEY, 
+
+ProviderName NVARCHAR(50), 
+
+Specialty NVARCHAR(50), 
+
+ClinicKEY NVARCHAR(50), 
+
+FOREIGN KEY (ClinicKEY) REFERENCES Clinic_DIM(ClinicKEY) 
+
+); 
+
+ 
+
+CREATE TABLE HealthService_DIM( 
+
+ServiceKEY NVARCHAR(50) PRIMARY KEY, 
+
+ServiceName NVARCHAR(50), 
+
+ServicePrice DECIMAL(10,2) 
+
+); 
+
+CREATE TABLE Patient_DIM( 
+
+PatientKEY NVARCHAR(50) PRIMARY KEY, 
+
+PatientFName NVARCHAR(50), 
+
+PatientLName NVARCHAR(50), 
+
+PatientDOB NVARCHAR(50), 
+
+PatientGender NVARCHAR(50), 
+
+PatientEmail NVARCHAR(50), 
+
+PatientZipCode NVARCHAR(50), 
+
+PatientPrimaryPhone NVARCHAR(50) 
+
+); 
+
+ 
+
+CREATE TABLE Appointment_DIM( 
+
+AppointmentKEY NVARCHAR(50) PRIMARY KEY, 
+
+PatientKEY NVARCHAR(50) NOT NULL, 
+
+ProviderKEY NVARCHAR(50) NOT NULL, 
+
+ClinicKEY NVARCHAR(50) NOT NULL, 
+
+ServiceKEY NVARCHAR(50) NOT NULL, 
+
+AptDate DATE NOT NULL, 
+
+AptTime TIME NOT NULL, 
+
+AptStatus NVARCHAR(50), 
+
+BookingMethod NVARCHAR(50), 
+
+--AptBilling Decimal(10,2), 
+
+FOREIGN KEY (PatientKEY) REFERENCES Patient_DIM(PatientKEY), 
+
+FOREIGN KEY (ProviderKEY) REFERENCES HealthProvider_DIM(ProviderKEY), 
+
+FOREIGN KEY (ClinicKEY) REFERENCES Clinic_DIM(ClinicKEY), 
+
+FOREIGN KEY (ServiceKEY) REFERENCES HealthService_DIM(ServiceKEY) 
+
+); 
+
+ 
+
+CREATE TABLE Inventory_DIM( 
+
+IventoryKEY NVARCHAR(50) PRIMARY KEY, 
+
+ClinicKEY NVARCHAR(50), 
+
+ItemName NVARCHAR(50), 
+
+QuantityAvailable INT, 
+
+QuantityUsed INT, 
+
+QuantityWasted INT, 
+
+InventoryDate DATE, 
+
+FOREIGN KEY (ClinicKEY) REFERENCES Clinic_DIM(ClinicKEY), 
+
+); 
+
+ 
+
+CREATE TABLE IncidentLogs_DIM( 
+
+IncidentKEY NVARCHAR(50) PRIMARY KEY, 
+
+ClinicKEY NVARCHAR(50), 
+
+IncidentDate DATE, 
+
+IncidentShift NVARCHAR(5), 
+
+IncidentType NVARCHAR(50), 
+
+IncidentNotes NVARCHAR(50), 
+
+FOREIGN KEY (ClinicKEY) REFERENCES Clinic_DIM(ClinicKEY), 
+
+); 
+
+ 
+
+CREATE TABLE Clinic_FACT( 
+
+ProviderKEY NVARCHAR(50), 
+
+AppointmentKEY NVARCHAR(50), 
+
+ClinicKEY NVARCHAR(50), 
+
+PatientKEY NVARCHAR(50), 
+
+ServiceKEY NVARCHAR(50), 
+
+--InventoryKEY NVARCHAR(20), 
+
+--IncidentKEY NVARCHAR(20), 
+
+AptCost INT, 
+
+FOREIGN KEY (AppointmentKEY) REFERENCES Appointment_DIM(AppointmentKEY), 
+
+FOREIGN KEY (ProviderKEY) REFERENCES HealthProvider_DIM(ProviderKEY), 
+
+FOREIGN KEY (ClinicKEY) REFERENCES Clinic_DIM(ClinicKEY), 
+
+FOREIGN KEY (PatientKEY) REFERENCES Patient_DIM(PatientKEY), 
+
+FOREIGN KEY (ServiceKEY) REFERENCES HealthService_DIM(ServiceKEY) 
+
+); 
+
+ 
+
+-- ETL 
+
+INSERT INTO Clinic_DIM(ClinicKEY, ClinicName, ClinicStreet, ClinicCity, ClinicState,ClnicZipCode) 
+
+SELECT ClinicID, ClinicName, ClinicStreet, ClinicCity, ClinicState, ClinicZipCode 
+
+FROM Clinic; 
+
+ 
+
+INSERT INTO HealthProvider_DIM(ProviderKEY, ProviderName, Specialty, ClinicKEY) 
+
+SELECT ProviderID, ProviderName, Specialty, ClinicID 
+
+FROM HealthProvider; 
+
+ 
+
+INSERT INTO HealthService_DIM(ServiceKEY, ServiceName, ServicePrice) 
+
+SELECT ServiceID, ServiceName, ServicePrice 
+
+FROM HealthService; 
+
+ 
+
+INSERT INTO Patient_DIM(PatientKEY, PatientFName, PatientLName, PatientDOB, PatientGender, PatientZipCode) 
+
+SELECT PatientID, PatientFname, PatientLName, PatientDOB, PatientGender, PatientZipCode 
+
+FROM Patient; 
+
+ 
+
+INSERT INTO Appointment_DIM(AppointmentKEY, PatientKEY, ProviderKEY, ClinicKEY, ServiceKEY, AptDate, AptTime, AptStatus, BookingMethod) 
+
+SELECT AppointmentID, PatientID, ProviderID, ClinicID, ServiceID, AptDate, AptTime, AptStatus, BookingMethod 
+
+FROM Appointment; 
+
+ 
+
+INSERT INTO Clinic_FACT(ProviderKEY, AppointmentKEY, ClinicKEY, PatientKEY, ServiceKEY, AptCost) 
+
+SELECT ProviderKEY, AppointmentKEY, ClinicKEY, PatientKEY, HS.ServiceKEY, ServicePrice 
+
+FROM Appointment_DIM APT JOIN HealthService_DIM HS ON APT.ServiceKEY = HS.ServiceKEY; 
+
+ 
+
+ 
+
+Edited Version 12/01/2025: 
+
+-- Dropping previously created tables if exist IF OBJECT_ID('Clinic_FACT') IS NOT NULL DROP TABLE Clinic_FACT; IF OBJECT_ID('IncidentLogs_DIM') IS NOT NULL DROP TABLE IncidentLogs_DIM; IF OBJECT_ID('Inventory_DIM') IS NOT NULL DROP TABLE Inventory_DIM; IF OBJECT_ID('Appointment_DIM') IS NOT NULL DROP TABLE Appointment_DIM; IF OBJECT_ID('Patient_DIM') IS NOT NULL DROP TABLE Patient_DIM; IF OBJECT_ID('HealthService_DIM') IS NOT NULL DROP TABLE HealthService_DIM; IF OBJECT_ID('HealthProvider_DIM') IS NOT NULL DROP TABLE HealthProvider_DIM; IF OBJECT_ID('Clinic_DIM') IS NOT NULL DROP TABLE Clinic_DIM; IF OBJECT_ID('IncidentLogs') IS NOT NULL DROP TABLE IncidentLogs; IF OBJECT_ID('Inventory') IS NOT NULL DROP TABLE Inventory; IF OBJECT_ID('Appointment') IS NOT NULL DROP TABLE Appointment; IF OBJECT_ID('Patient') IS NOT NULL DROP TABLE Patient; IF OBJECT_ID('HealthService') IS NOT NULL DROP TABLE HealthService; IF OBJECT_ID('HealthProvider') IS NOT NULL DROP TABLE HealthProvider; IF OBJECT_ID('Clinic') IS NOT NULL DROP TABLE Clinic; 
+
+-- ERD Database CREATE TABLE Clinic( ClinicID NVARCHAR(50) PRIMARY KEY, CLinicName NVARCHAR(50), ClinicStreet NVARCHAR(50), ClinicCity NVARCHAR(50), ClinicState NVARCHAR(50), ClinicZipCode NVARCHAR(50) ); 
+
+CREATE TABLE HealthProvider( ProviderID NVARCHAR(50) PRIMARY KEY, ProviderName NVARCHAR(50), Specialty NVARCHAR(50), ClinicID NVARCHAR(50), FOREIGN KEY (ClinicID) REFERENCES Clinic(ClinicID) ); 
+
+CREATE TABLE HealthService( ServiceID NVARCHAR(50) PRIMARY KEY, ServiceName NVARCHAR(50), ServicePrice DECIMAL(10,2) ); 
+
+CREATE TABLE Patient( PatientID NVARCHAR(50) PRIMARY KEY, PatientFName NVARCHAR(50), PatientLName NVARCHAR(50), PatientDOB NVARCHAR(50), PatientGender NVARCHAR(50), PatientEmail NVARCHAR(50), PatientZipCode NVARCHAR(50), PatientPrimaryPhone NVARCHAR(50) ); 
+
+CREATE TABLE Appointment( AppointmentID NVARCHAR(50) PRIMARY KEY, PatientID NVARCHAR(50) NOT NULL, ProviderID NVARCHAR(50) NOT NULL, ClinicID NVARCHAR(50) NOT NULL, ServiceID NVARCHAR(50) NOT NULL, AptDate DATE NOT NULL, AptTime TIME NOT NULL, AptStatus NVARCHAR(50), BookingMethod NVARCHAR(50), AptBilling Decimal(10,2), FOREIGN KEY (PatientID) REFERENCES Patient(PatientID), FOREIGN KEY (ProviderID) REFERENCES HealthProvider(ProviderID), FOREIGN KEY (ClinicID) REFERENCES Clinic(ClinicID), FOREIGN KEY (ServiceID) REFERENCES HealthService(ServiceID) ); 
+
+CREATE TABLE Inventory( InventoryID NVARCHAR(50) PRIMARY KEY, ClinicID NVARCHAR(50), ItemName NVARCHAR(50), QuantityAvailable INT, QuantityUsed INT, QuantityWasted INT, InventoryDate DATE, FOREIGN KEY (ClinicID) REFERENCES Clinic(ClinicID) ); 
+
+CREATE TABLE IncidentLogs( IncidentID NVARCHAR(50) PRIMARY KEY, ClinicID NVARCHAR(50), IncidentDate DATE, IncidentShift NVARCHAR(20), IncidentType NVARCHAR(50), IncidentNotes NVARCHAR(50), FOREIGN KEY (ClinicID) REFERENCES Clinic(ClinicID) ); 
+
+-- Populate Tables INSERT INTO Clinic(ClinicID, ClinicName, ClinicStreet, ClinicCity, ClinicState, ClinicZipCode) VALUES ('C001', 'TAPED', '123 Maplewood Drive', 'Ridgefield', 'WA', '98642'), ('C002', 'TAPED', '456 Cedar Lane', 'Ridgefield', 'WA', '98642'), ('C003', 'TAPED', '789 Oakcrest Avenue', 'Ridgefield', 'WA', '98642'), ('C004', 'TAPED', '321 Pineview Court', 'Ridgefield', 'WA', '98642'); 
+
+INSERT INTO HealthProvider(ProviderID, ProviderName, Specialty, ClinicID) VALUES ('P001', 'Dr. Lee', 'Family Medicine', 'C001'), ('P002', 'Dr. Patel', 'Pediatrics', 'C002'), ('P003', 'Dr. Chen', 'Internal Medicine', 'C003'), ('P004', 'NP Johnson', 'Nurse Practitioner', 'C002'), ('P005', 'Dr. Garcia', 'Family Medicine', 'C004'), ('P006', 'Dr. Nguyen', 'Preventive Care', 'C002'), ('P007', 'Dr. Smith', 'Pediatrics', 'C002'), ('P008', 'Dr. Allen', 'Family Medicine', 'C002'), ('P009', 'RN Davis', 'Nurse Practitioner', 'C004'), ('P010', 'Dr. Roberts', 'Chronic Care', 'C004'), ('P011', 'RN Flores', 'Nurse Practitioner', 'C002'), ('P012', 'Dr. Adams', 'Preventive Care', 'C001'); 
+
+INSERT INTO HealthService(ServiceID, ServiceName, ServicePrice) VALUES ('S001', 'General Checkup', 85), ('S002', 'Vaccination', 35), ('S003', 'Blood Test', 45), ('S004', 'Health Screening', 75), ('S005', 'Chronic Care Follow-Up', 90), ('S006', 'Wellness Counseling', 60); 
+
+INSERT INTO Patient(PatientID, PatientFName, PatientLName, PatientDOB, PatientGender, PatientZipCode) VALUES ('PT001', 'Maria', 'Davis', '1994-07-04', 'F', '98642'), ('PT002', 'Sophia', 'Davis', '1973-12-11', 'M', '98663'), ('PT003', 'Emily', 'Davis', '1973-12-10', 'M', '98660'), ('PT004', 'Maria', 'Martinez', '1998-05-24', 'M', '98642'), ('PT005', 'James', 'Nguyen', '2002-11-01', 'F', '98661'), ('PT006', 'Ava', 'Lee', '1970-06-07', 'F', '98604'), ('PT007', 'John', 'Davis', '2010-01-14', 'M', '98664'), ('PT008', 'Sophia', 'Davis', '1975-02-13', 'F', '98642'), ('PT009', 'David', 'Martinez', '1999-07-01', 'M', '98629'), ('PT010', 'Sara', 'Martinez', '2005-01-24', 'F', '98642'), ('PT011', 'Alice', 'Martinez', '1984-01-10', 'F', '98683'), ('PT012', 'John', 'Lee', '1993-12-04', 'F', '98607'), ('PT013', 'Emily', 'Taylor', '1951-09-10', 'F', '98665'), ('PT014', 'David', 'Lee', '1951-07-06', 'M', '98674'), ('PT015', 'Ethan', 'Clark', '1986-07-23', 'M', '98642'), ('PT016', 'Alice', 'Garcia', '1996-12-27', 'F', '98642'), ('PT017', 'Maria', 'Johnson', '1998-07-21', 'F', '98662'), ('PT018', 'Sara', 'Perez', '1993-12-03', 'M', '98642'), ('PT019', 'Ava', 'Lee', '1958-11-21', 'M', '98671'), ('PT020', 'Ava', 'Garcia', '1996-06-14', 'F', '98684'), ('PT021', 'Ethan', 'Johnson', '1988-04-23', 'F', '98685'), ('PT022', 'Emily', 'Nguyen', '1986-02-13', 'F', '98642'), ('PT023', 'Daniel', 'Johnson', '2007-03-12', 'M', '98661'), ('PT024', 'Maria', 'Clark', '1984-11-21', 'F', '98660'), ('PT025', 'Emily', 'Johnson', '1952-10-28', 'M', '98642'), ('PT026', 'Daniel', 'Clark', '1956-12-02', 'F', '98664'), ('PT027', 'Michael', 'Perez', '1975-11-23', 'F', '98663'), ('PT028', 'Ava', 'Nguyen', '1983-09-19', 'M', '98642'), ('PT029', 'James', 'Johnson', '1950-05-28', 'M', '98642'), ('PT030', 'Ethan', 'Johnson', '1970-07-03', 'M', '98682'), ('PT031', 'Ethan', 'Martinez', '1964-12-22', 'F', '98642'), ('PT032', 'Daniel', 'Johnson', '1970-09-05', 'F', '98665'), ('PT033', 'Robert', 'Johnson', '1996-10-10', 'F', '98604'), ('PT034', 'Robert', 'Brown', '1972-04-12', 'M', '98642'), ('PT035', 'Robert', 'Lee', '1987-06-14', 'M', '98674'), ('PT036', 'Isabella', 'Perez', '1965-05-25', 'F', '98661'), ('PT037', 'Ethan', 'Taylor', '1976-06-02', 'M', '98642'), ('PT038', 'Daniel', 'Wilson', '1970-01-18', 'F', '98660'), ('PT039', 'David', 'Clark', '1957-09-14', 'M', '98671'), ('PT040', 'James', 'Martinez', '2006-08-01', 'F', '98642'), ('PT041', 'Maria', 'Davis', '1956-11-09', 'M', '98642'), ('PT042', 'David', 'Clark', '1969-03-03', 'M', '98663'), ('PT043', 'Ethan', 'Nguyen', '1964-10-06', 'F', '98642'), ('PT044', 'Emily', 'Martinez', '1986-07-10', 'F', '98629'), ('PT045', 'John', 'Taylor', '1956-06-16', 'M', '98683'), ('PT046', 'Isabella', 'Smith', '1976-12-22', 'M', '98642'), ('PT047', 'Olivia', 'Smith', '1974-03-09', 'M', '98662'), ('PT048', 'James', 'Davis', '1966-02-19', 'F', '98642'), ('PT049', 'Daniel', 'Garcia', '1986-02-14', 'M', '98684'), ('PT050', 'David', 'Lee', '1984-11-18', 'F', '98642'), ('PT051', 'Sophia', 'Taylor', '1973-04-17', 'F', '98607'), ('PT052', 'Sophia', 'Perez', '1982-12-27', 'M', '98665'), ('PT053', 'David', 'Davis', '1996-11-14', 'F', '98642'), ('PT054', 'Daniel', 'Davis', '2006-05-04', 'M', '98642'), ('PT055', 'Olivia', 'Taylor', '1972-07-26', 'M', '98660'), ('PT056', 'James', 'Clark', '1987-03-07', 'M', '98663'), ('PT057', 'Michael', 'Taylor', '1988-06-12', 'M', '98642'), ('PT058', 'Emily', 'Clark', '1964-01-19', 'M', '98671'), ('PT059', 'Sophia', 'Johnson', '2008-01-24', 'M', '98642'), ('PT060', 'David', 'Garcia', '1987-11-12', 'F', '98661'), ('PT061', 'Olivia', 'Clark', '1961-04-02', 'M', '98642'), ('PT062', 'Robert', 'Brown', '1965-04-24', 'M', '98682'), ('PT063', 'Maria', 'Clark', '1965-04-06', 'M', '98642'), ('PT064', 'Ava', 'Garcia', '1978-07-13', 'F', '98642'), ('PT065', 'James', 'Wilson', '1960-06-04', 'F', '98674'), ('PT066', 'Alice', 'Smith', '1967-06-22', 'M', '98642'), ('PT067', 'Daniel', 'Perez', '1997-05-28', 'M', '98685'), ('PT068', 'Daniel', 'Garcia', '1964-11-04', 'F', '98664'), ('PT069', 'Daniel', 'Nguyen', '1973-11-06', 'M', '98642'), ('PT070', 'Sophia', 'Perez', '1979-11-10', 'F', '98642'), ('PT071', 'James', 'Smith', '1950-09-06', 'F', '98660'), ('PT072', 'Isabella', 'Perez', '1998-05-03', 'M', '98642'), ('PT073', 'Sophia', 'Clark', '1980-12-28', 'M', '98662'), ('PT074', 'Ava', 'Perez', '2006-02-28', 'F', '98642'), ('PT075', 'Isabella', 'Garcia', '1990-06-20', 'F', '98642'), ('PT076', 'James', 'Clark', '2009-03-10', 'F', '98663'), ('PT077', 'Sophia', 'Davis', '1971-12-11', 'M', '98604'), ('PT078', 'Ava', 'Brown', '1984-06-04', 'M', '98642'), ('PT079', 'Isabella', 'Perez', '1953-12-11', 'M', '98642'), ('PT080', 'Isabella', 'Lee', '1956-10-13', 'M', '98661'), ('PT081', 'James', 'Clark', '1990-02-11', 'F', '98642'), ('PT082', 'John', 'Garcia', '2004-02-09', 'M', '98665'), ('PT083', 'Michael', 'Smith', '1955-05-16', 'F', '98642'), ('PT084', 'Olivia', 'Perez', '1981-01-14', 'M', '98629'), ('PT085', 'Alice', 'Johnson', '1964-12-26', 'M', '98642'), ('PT086', 'Olivia', 'Garcia', '1959-11-04', 'F', '98683'), ('PT087', 'David', 'Clark', '1955-01-02', 'F', '98642'), ('PT088', 'Daniel', 'Wilson', '2005-02-03', 'M', '98642'), ('PT089', 'John', 'Lee', '1956-02-07', 'M', '98607'), ('PT090', 'Isabella', 'Martinez', '1966-03-24', 'M', '98642'), ('PT091', 'Daniel', 'Taylor', '1965-08-25', 'F', '98642'), ('PT092', 'John', 'Lee', '1974-07-12', 'M', '98671'), ('PT093', 'John', 'Smith', '1998-10-14', 'F', '98642'), ('PT094', 'Sara', 'Davis', '1963-02-24', 'M', '98642'), ('PT095', 'Emily', 'Brown', '1962-03-15', 'M', '98642'), ('PT096', 'Daniel', 'Martinez', '1971-12-10', 'F', '98684'), ('PT097', 'Michael', 'Davis', '1967-12-21', 'F', '98642'), ('PT098', 'James', 'Johnson', '1988-03-14', 'M', '98642'), ('PT099', 'Sara', 'Taylor', '1950-03-16', 'F', '98663'), ('PT100', 'Maria', 'Garcia', '1998-09-25', 'F', '98660'); 
+
+INSERT INTO Appointment(AppointmentID, PatientID, ProviderID, ClinicID, ServiceID, AptDate, AptTime, AptStatus, BookingMethod, AptBilling) VALUES ('A001', 'PT062', 'P002', 'C002', 'S002', '2025-08-01', '14:30:00', 'Cancelled', 'Online Portal', 35), ('A002', 'PT047', 'P002', 'C002', 'S002', '2025-08-04', '08:00:00', 'Completed', 'Call-in System', 35), ('A003', 'PT051', 'P008', 'C002', 'S001', '2025-08-05', '08:00:00', 'No-show', 'Call-in System', 85), ('A004', 'PT089', 'P010', 'C004', 'S004', '2025-08-06', '16:00:00', 'Completed', 'Call-in System', 75), ('A005', 'PT054', 'P003', 'C003', 'S005', '2025-08-07', '09:30:00', 'Completed', 'Online Portal', 90), ('A006', 'PT093', 'P008', 'C002', 'S004', '2025-08-08', '14:30:00', 'Completed', 'Online Portal', 75), ('A007', 'PT008', 'P012', 'C001', 'S003', '2025-08-11', '16:00:00', 'No-show', 'Call-in System', 45), ('A008', 'PT075', 'P002', 'C002', 'S001', '2025-08-12', '11:00:00', 'Completed', 'Call-in System', 85), ('A009', 'PT001', 'P001', 'C001', 'S001', '2025-08-13', '11:00:00', 'Completed', 'Call-in System', 85), ('A010', 'PT076', 'P011', 'C002', 'S001', '2025-08-14', '09:30:00', 'No-show', 'Online Portal', 85), ('A011', 'PT095', 'P006', 'C002', 'S005', '2025-08-15', '13:00:00', 'No-show', 'Call-in System', 90), ('A012', 'PT005', 'P008', 'C002', 'S001', '2025-08-18', '16:00:00', 'Completed', 'Call-in System', 85), ('A013', 'PT086', 'P005', 'C004', 'S004', '2025-08-19', '09:30:00', 'No-show', 'Call-in System', 75), ('A014', 'PT012', 'P005', 'C004', 'S006', '2025-08-20', '16:00:00', 'Completed', 'Online Portal', 60), ('A015', 'PT015', 'P005', 'C004', 'S001', '2025-08-21', '13:00:00', 'Completed', 'Call-in System', 85), ('A016', 'PT014', 'P008', 'C002', 'S002', '2025-08-22', '08:00:00', 'Completed', 'Call-in System', 35), ('A017', 'PT078', 'P005', 'C004', 'S001', '2025-08-25', '13:00:00', 'Completed', 'Online Portal', 85), ('A018', 'PT063', 'P003', 'C003', 'S001', '2025-08-26', '13:00:00', 'Cancelled', 'Call-in System', 85), ('A019', 'PT092', 'P003', 'C003', 'S003', '2025-08-27', '09:30:00', 'Completed', 'Call-in System', 45), ('A020', 'PT047', 'P011', 'C002', 'S004', '2025-08-28', '14:30:00', 'Completed', 'Call-in System', 75), ('A021', 'PT094', 'P004', 'C002', 'S005', '2025-08-29', '13:00:00', 'No-show', 'Online Portal', 90), ('A022', 'PT089', 'P010', 'C004', 'S006', '2025-09-01', '11:00:00', 'Completed', 'Online Portal', 60), ('A023', 'PT019', 'P007', 'C002', 'S005', '2025-09-02', '13:00:00', 'Cancelled', 'Online Portal', 90), ('A024', 'PT096', 'P009', 'C004', 'S002', '2025-09-03', '14:30:00', 'No-show', 'Online Portal', 35), ('A025', 'PT056', 'P003', 'C003', 'S005', '2025-09-04', '09:30:00', 'Completed', 'Online Portal', 90), ('A026', 'PT054', 'P004', 'C002', 'S002', '2025-09-05', '11:00:00', 'Cancelled', 'Call-in System', 35), ('A027', 'PT100', 'P005', 'C004', 'S005', '2025-09-08', '14:30:00', 'No-show', 'Online Portal', 90), ('A028', 'PT032', 'P003', 'C003', 'S004', '2025-09-09', '13:00:00', 'Completed', 'Call-in System', 75), ('A029', 'PT100', 'P009', 'C004', 'S001', '2025-09-10', '09:30:00', 'No-show', 'Online Portal', 85), ('A030', 'PT063', 'P002', 'C002', 'S002', '2025-09-11', '13:00:00', 'Completed', 'Call-in System', 35), ('A031', 'PT085', 'P010', 'C004', 'S006', '2025-09-12', '09:30:00', 'Completed', 'Online Portal', 60), ('A032', 'PT006', 'P001', 'C001', 'S002', '2025-09-15', '16:00:00', 'Cancelled', 'Online Portal', 35), ('A033', 'PT018', 'P012', 'C001', 'S001', '2025-09-16', '11:00:00', 'No-show', 'Online Portal', 85), ('A034', 'PT092', 'P001', 'C001', 'S001', '2025-09-17', '13:00:00', 'No-show', 'Online Portal', 85), ('A035', 'PT023', 'P007', 'C002', 'S005', '2025-09-18', '13:00:00', 'Completed', 'Call-in System', 90), ('A036', 'PT038', 'P011', 'C002', 'S005', '2025-09-19', '08:00:00', 'Completed', 'Online Portal', 90), ('A037', 'PT025', 'P004', 'C002', 'S002', '2025-09-22', '13:00:00', 'Completed', 'Call-in System', 35), ('A038', 'PT038', 'P001', 'C001', 'S004', '2025-09-23', '08:00:00', 'Completed', 'Online Portal', 75), ('A039', 'PT088', 'P001', 'C001', 'S001', '2025-09-24', '08:00:00', 'Completed', 'Online Portal', 85), ('A040', 'PT019', 'P012', 'C001', 'S004', '2025-09-25', '13:00:00', 'Completed', 'Call-in System', 75), ('A041', 'PT047', 'P003', 'C003', 'S002', '2025-09-26', '13:00:00', 'Completed', 'Online Portal', 35), ('A042', 'PT063', 'P011', 'C002', 'S004', '2025-09-29', '08:00:00', 'Completed', 'Call-in System', 75), ('A043', 'PT095', 'P003', 'C003', 'S003', '2025-09-30', '16:00:00', 'No-show', 'Call-in System', 45), ('A044', 'PT099', 'P012', 'C001', 'S005', '2025-10-01', '14:30:00', 'Completed', 'Online Portal', 90), ('A045', 'PT023', 'P008', 'C002', 'S004', '2025-10-02', '16:00:00', 'Completed', 'Call-in System', 75), ('A046', 'PT043', 'P003', 'C003', 'S001', '2025-10-03', '14:30:00', 'Completed', 'Call-in System', 85), ('A047', 'PT038', 'P002', 'C002', 'S004', '2025-08-01', '11:00:00', 'Completed', 'Call-in System', 75), ('A048', 'PT011', 'P011', 'C002', 'S004', '2025-08-04', '08:00:00', 'Completed', 'Online Portal', 75), ('A049', 'PT001', 'P011', 'C002', 'S002', '2025-08-05', '13:00:00', 'Cancelled', 'Call-in System', 35), ('A050', 'PT031', 'P001', 'C001', 'S006', '2025-08-06', '11:00:00', 'Cancelled', 'Online Portal', 60), ('A051', 'PT056', 'P004', 'C002', 'S003', '2025-08-07', '11:00:00', 'Completed', 'Online Portal', 45), ('A052', 'PT054', 'P007', 'C002', 'S006', '2025-08-08', '16:00:00', 'Completed', 'Online Portal', 60), ('A053', 'PT002', 'P005', 'C004', 'S005', '2025-08-11', '09:30:00', 'No-show', 'Call-in System', 90), ('A054', 'PT040', 'P003', 'C003', 'S003', '2025-08-12', '14:30:00', 'Completed', 'Online Portal', 45), ('A055', 'PT077', 'P005', 'C004', 'S004', '2025-08-13', '09:30:00', 'Completed', 'Call-in System', 75), ('A056', 'PT092', 'P009', 'C004', 'S002', '2025-08-14', '13:00:00', 'No-show', 'Call-in System', 35), ('A057', 'PT024', 'P006', 'C002', 'S005', '2025-08-15', '13:00:00', 'Completed', 'Online Portal', 90), ('A058', 'PT092', 'P007', 'C002', 'S004', '2025-08-18', '14:30:00', 'Completed', 'Online Portal', 75), ('A059', 'PT050', 'P010', 'C004', 'S003', '2025-08-19', '16:00:00', 'Completed', 'Call-in System', 45), ('A060', 'PT069', 'P001', 'C001', 'S001', '2025-08-20', '11:00:00', 'Completed', 'Call-in System', 85), ('A061', 'PT086', 'P001', 'C001', 'S006', '2025-08-21', '09:30:00', 'Completed', 'Online Portal', 60), ('A062', 'PT047', 'P004', 'C002', 'S004', '2025-08-22', '14:30:00', 'Completed', 'Online Portal', 75), ('A063', 'PT020', 'P002', 'C002', 'S004', '2025-08-25', '08:00:00', 'Cancelled', 'Online Portal', 75), ('A064', 'PT006', 'P007', 'C002', 'S005', '2025-08-26', '14:30:00', 'No-show', 'Online Portal', 90), ('A065', 'PT051', 'P002', 'C002', 'S003', '2025-08-27', '08:00:00', 'Completed', 'Call-in System', 45), ('A066', 'PT058', 'P010', 'C004', 'S006', '2025-08-28', '16:00:00', 'Completed', 'Call-in System', 60), ('A067', 'PT050', 'P002', 'C002', 'S004', '2025-08-29', '14:30:00', 'Completed', 'Online Portal', 75), ('A068', 'PT067', 'P008', 'C002', 'S001', '2025-09-01', '08:00:00', 'No-show', 'Call-in System', 85), ('A069', 'PT070', 'P005', 'C004', 'S002', '2025-09-02', '09:30:00', 'Completed', 'Online Portal', 35), ('A070', 'PT058', 'P002', 'C002', 'S005', '2025-09-03', '13:00:00', 'Completed', 'Online Portal', 90), ('A071', 'PT013', 'P012', 'C001', 'S005', '2025-09-04', '11:00:00', 'No-show', 'Call-in System', 90), ('A072', 'PT093', 'P010', 'C004', 'S001', '2025-09-05', '14:30:00', 'Completed', 'Online Portal', 85), ('A073', 'PT025', 'P002', 'C002', 'S003', '2025-09-08', '08:00:00', 'Completed', 'Call-in System', 45), ('A074', 'PT046', 'P006', 'C002', 'S001', '2025-09-09', '13:00:00', 'No-show', 'Online Portal', 85), ('A075', 'PT020', 'P007', 'C002', 'S003', '2025-09-10', '13:00:00', 'Completed', 'Call-in System', 45), ('A076', 'PT053', 'P009', 'C004', 'S003', '2025-09-11', '09:30:00', 'Completed', 'Online Portal', 45), ('A077', 'PT084', 'P009', 'C004', 'S004', '2025-09-12', '11:00:00', 'Completed', 'Online Portal', 75), ('A078', 'PT023', 'P002', 'C002', 'S005', '2025-09-15', '16:00:00', 'Completed', 'Online Portal', 90), ('A079', 'PT019', 'P007', 'C002', 'S001', '2025-09-16', '16:00:00', 'Completed', 'Online Portal', 85), ('A080', 'PT047', 'P011', 'C002', 'S002', '2025-09-17', '11:00:00', 'Cancelled', 'Call-in System', 35), ('A081', 'PT008', 'P003', 'C003', 'S004', '2025-09-18', '08:00:00', 'Completed', 'Call-in System', 75), ('A082', 'PT091', 'P001', 'C001', 'S001', '2025-09-19', '09:30:00', 'Completed', 'Online Portal', 85), ('A083', 'PT019', 'P012', 'C001', 'S005', '2025-09-22', '14:30:00', 'Completed', 'Online Portal', 90), ('A084', 'PT040', 'P007', 'C002', 'S003', '2025-09-23', '08:00:00', 'Completed', 'Online Portal', 45), ('A085', 'PT032', 'P004', 'C002', 'S001', '2025-09-24', '11:00:00', 'No-show', 'Call-in System', 85), ('A086', 'PT095', 'P011', 'C002', 'S004', '2025-09-25', '16:00:00', 'Completed', 'Online Portal', 75), ('A087', 'PT053', 'P003', 'C003', 'S005', '2025-09-26', '11:00:00', 'Completed', 'Call-in System', 90), ('A088', 'PT092', 'P003', 'C003', 'S004', '2025-09-29', '09:30:00', 'Completed', 'Call-in System', 75), ('A089', 'PT086', 'P012', 'C001', 'S005', '2025-09-30', '16:00:00', 'Completed', 'Call-in System', 90), ('A090', 'PT093', 'P001', 'C001', 'S005', '2025-10-01', '13:00:00', 'Completed', 'Online Portal', 90), ('A091', 'PT087', 'P008', 'C002', 'S001', '2025-10-02', '09:30:00', 'Cancelled', 'Call-in System', 85), ('A092', 'PT077', 'P001', 'C001', 'S006', '2025-10-03', '13:00:00', 'Completed', 'Online Portal', 60), ('A093', 'PT100', 'P011', 'C002', 'S005', '2025-09-22', '11:00:00', 'Cancelled', 'Call-in System', 90), ('A094', 'PT052', 'P004', 'C002', 'S006', '2025-09-23', '11:00:00', 'Completed', 'Online Portal', 60), ('A095', 'PT092', 'P007', 'C002', 'S005', '2025-09-24', '16:00:00', 'Completed', 'Call-in System', 90), ('A096', 'PT090', 'P001', 'C001', 'S005', '2025-09-25', '11:00:00', 'Completed', 'Call-in System', 90), ('A097', 'PT008', 'P002', 'C002', 'S003', '2025-09-26', '16:00:00', 'Completed', 'Call-in System', 45), ('A098', 'PT093', 'P007', 'C002', 'S002', '2025-09-29', '11:00:00', 'Completed', 'Online Portal', 35), ('A099', 'PT090', 'P011', 'C002', 'S003', '2025-09-30', '14:30:00', 'Completed', 'Online Portal', 45), ('A100', 'PT044', 'P003', 'C003', 'S005', '2025-10-01', '08:00:00', 'No-show', 'Online Portal', 90); 
+
+INSERT INTO Inventory(InventoryID, ClinicID, ItemName, QuantityAvailable, QuantityUsed, QuantityWasted, InventoryDate) VALUES ('I001', 'C003', 'Syringes', 324, 158, 0, '2025-09-24'), ('I002', 'C001', 'Gloves', 501, 163, 19, '2025-09-25'), ('I003', 'C003', 'Test Kits', 310, 194, 8, '2025-09-26'), ('I004', 'C002', 'Syringes', 371, 110, 4, '2025-09-29'), ('I005', 'C001', 'Masks', 203, 132, 1, '2025-09-30'), ('I006', 'C003', 'Masks', 245, 95, 14, '2025-09-08'), ('I007', 'C003', 'Masks', 305, 78, 8, '2025-09-08'), ('I008', 'C001', 'Masks', 234, 134, 1, '2025-09-09'), ('I009', 'C004', 'Test Kits', 521, 84, 17, '2025-09-10'), ('I010', 'C003', 'Test Kits', 345, 59, 11, '2025-09-12'), ('I011', 'C004', 'Test Kits', 280, 78, 19, '2025-09-15'), ('I012', 'C004', 'Syringes', 326, 172, 12, '2025-09-16'), ('I013', 'C004', 'Test Kits', 285, 152, 7, '2025-09-17'), ('I014', 'C003', 'Test Kits', 224, 123, 12, '2025-09-18'), ('I015', 'C001', 'Syringes', 315, 197, 2, '2025-09-19'), ('I016', 'C004', 'Vaccines', 398, 141, 3, '2025-09-22'), ('I017', 'C001', 'Test Kits', 528, 103, 8, '2025-09-22'), ('I018', 'C003', 'Masks', 533, 175, 3, '2025-09-23'), ('I019', 'C002', 'Gloves', 555, 98, 8, '2025-09-24'), ('I020', 'C002', 'Masks', 480, 120, 8, '2025-09-25'), ('I021', 'C003', 'Test Kits', 342, 128, 0, '2025-09-26'), ('I022', 'C001', 'Masks', 592, 142, 4, '2025-09-29'), ('I023', 'C002', 'Gloves', 345, 187, 8, '2025-09-29'), ('I024', 'C002', 'Test Kits', 325, 119, 17, '2025-09-30'), ('I025', 'C004', 'Gloves', 573, 73, 9, '2025-09-01'), ('I026', 'C004', 'Syringes', 562, 85, 6, '2025-09-03'), ('I027', 'C004', 'Test Kits', 346, 186, 12, '2025-09-04'), ('I028', 'C002', 'Gloves', 346, 184, 10, '2025-09-05'), ('I029', 'C004', 'Masks', 509, 178, 19, '2025-09-08'), ('I030', 'C002', 'Masks', 356, 180, 0, '2025-09-09'), ('I031', 'C001', 'Masks', 365, 85, 19, '2025-09-10'), ('I032', 'C001', 'Test Kits', 596, 115, 3, '2025-09-12'), ('I033', 'C002', 'Gloves', 305, 180, 16, '2025-09-15'), ('I034', 'C003', 'Gloves', 482, 172, 8, '2025-09-16'), ('I035', 'C004', 'Gloves', 468, 177, 2, '2025-09-17'), ('I036', 'C003', 'Gloves', 346, 65, 10, '2025-09-18'), ('I037', 'C001', 'Masks', 583, 162, 5, '2025-09-19'), ('I038', 'C004', 'Test Kits', 305, 126, 12, '2025-09-22'), ('I039', 'C003', 'Masks', 428, 184, 8, '2025-09-23'), ('I040', 'C002', 'Syringes', 335, 164, 15, '2025-09-24'), ('I041', 'C004', 'Gloves', 361, 74, 17, '2025-09-25'), ('I042', 'C003', 'Gloves', 389, 85, 12, '2025-09-26'), ('I043', 'C002', 'Syringes', 387, 158, 7, '2025-09-29'), ('I044', 'C004', 'Gloves', 361, 142, 6, '2025-09-30'), ('I045', 'C002', 'Masks', 520, 95, 1, '2025-09-01'), ('I046', 'C001', 'Masks', 336, 136, 18, '2025-09-03'), ('I047', 'C004', 'Syringes', 302, 96, 15, '2025-09-04'), ('I048', 'C001', 'Syringes', 389, 79, 0, '2025-09-05'), ('I049', 'C004', 'Syringes', 586, 88, 13, '2025-09-08'), ('I050', 'C003', 'Test Kits', 468, 141, 17, '2025-09-09'), ('I051', 'C003', 'Gloves', 448, 178, 2, '2025-09-10'), ('I052', 'C002', 'Test Kits', 458, 76, 18, '2025-09-12'), ('I053', 'C003', 'Syringes', 389, 88, 2, '2025-09-15'), ('I054', 'C003', 'Masks', 455, 118, 10, '2025-09-16'), ('I055', 'C004', 'Gloves', 461, 163, 11, '2025-09-17'), ('I056', 'C004', 'Test Kits', 578, 162, 17, '2025-09-18'), ('I057', 'C001', 'Gloves', 577, 182, 2, '2025-09-19'), ('I058', 'C004', 'Test Kits', 311, 119, 13, '2025-09-22'), ('I059', 'C001', 'Test Kits', 318, 154, 13, '2025-09-23'), ('I060', 'C003', 'Masks', 500, 173, 4, '2025-09-24'), ('I061', 'C003', 'Test Kits', 566, 125, 16, '2025-09-25'), ('I062', 'C004', 'Syringes', 309, 185, 1, '2025-09-26'), ('I063', 'C003', 'Test Kits', 578, 134, 18, '2025-09-29'), ('I064', 'C002', 'Syringes', 408, 103, 3, '2025-09-30'), ('I065', 'C001', 'Masks', 343, 154, 15, '2025-09-01'), ('I066', 'C004', 'Test Kits', 574, 143, 8, '2025-09-03'), ('I067', 'C003', 'Gloves', 564, 123, 3, '2025-09-04'), ('I068', 'C001', 'Syringes', 491, 159, 4, '2025-09-05'), ('I069', 'C003', 'Syringes', 338, 128, 19, '2025-09-08'), ('I070', 'C001', 'Masks', 329, 64, 19, '2025-09-09'), ('I071', 'C002', 'Gloves', 537, 114, 15, '2025-09-10'), ('I072', 'C002', 'Test Kits', 551, 99, 14, '2025-09-12'), ('I073', 'C003', 'Masks', 305, 136, 14, '2025-09-15'), ('I074', 'C004', 'Test Kits', 428, 104, 12, '2025-09-16'), ('I075', 'C004', 'Test Kits', 545, 168, 15, '2025-09-17'), ('I076', 'C002', 'Masks', 527, 103, 2, '2025-09-18'), ('I077', 'C001', 'Test Kits', 340, 70, 7, '2025-09-19'), ('I078', 'C003', 'Syringes', 510, 115, 11, '2025-09-22'), ('I079', 'C001', 'Gloves', 333, 174, 14, '2025-09-23'), ('I080', 'C002', 'Gloves', 300, 62, 1, '2025-09-24'), ('I081', 'C002', 'Syringes', 573, 117, 2, '2025-09-25'), ('I082', 'C003', 'Gloves', 409, 83, 9, '2025-09-26'), ('I083', 'C003', 'Test Kits', 322, 138, 4, '2025-09-29'), ('I084', 'C004', 'Gloves', 484, 197, 15, '2025-09-30'), ('I085', 'C001', 'Syringes', 471, 78, 8, '2025-09-01'), ('I086', 'C003', 'Gloves', 478, 128, 9, '2025-09-03'), ('I087', 'C003', 'Gloves', 564, 79, 12, '2025-09-04'), ('I088', 'C004', 'Gloves', 462, 110, 10, '2025-09-05'), ('I089', 'C003', 'Test Kits', 433, 167, 15, '2025-09-08'), ('I090', 'C004', 'Masks', 540, 134, 8, '2025-09-09'), ('I091', 'C002', 'Test Kits', 364, 113, 18, '2025-09-10'), ('I092', 'C002', 'Test Kits', 310, 122, 1, '2025-09-12'), ('I093', 'C002', 'Masks', 374, 75, 4, '2025-09-15'), ('I094', 'C001', 'Gloves', 547, 121, 2, '2025-09-16'), ('I095', 'C002', 'Syringes', 592, 108, 8, '2025-09-17'), ('I096', 'C004', 'Syringes', 362, 134, 0, '2025-09-18'), ('I097', 'C001', 'Syringes', 308, 191, 7, '2025-09-19'), ('I098', 'C001', 'Masks', 406, 96, 17, '2025-09-22'), ('I099', 'C002', 'Masks', 302, 196, 15, '2025-09-23'); 
+
+-- Star Schema CREATE TABLE Clinic_DIM( ClinicKEY NVARCHAR(50) PRIMARY KEY, CLinicName NVARCHAR(50), ClinicStreet NVARCHAR(50), ClinicCity NVARCHAR(50), ClinicState NVARCHAR(50), ClinicZipCode NVARCHAR(50) ); 
+
+CREATE TABLE HealthProvider_DIM( ProviderKEY NVARCHAR(50) PRIMARY KEY, ProviderName NVARCHAR(50), Specialty NVARCHAR(50), ClinicKEY NVARCHAR(50), FOREIGN KEY (ClinicKEY) REFERENCES Clinic_DIM(ClinicKEY) ); 
+
+CREATE TABLE HealthService_DIM( ServiceKEY NVARCHAR(50) PRIMARY KEY, ServiceName NVARCHAR(50), ServicePrice DECIMAL(10,2) ); CREATE TABLE Patient_DIM( PatientKEY NVARCHAR(50) PRIMARY KEY, PatientFName NVARCHAR(50), PatientLName NVARCHAR(50), PatientDOB NVARCHAR(50), PatientGender NVARCHAR(50), PatientEmail NVARCHAR(50), PatientZipCode NVARCHAR(50), PatientPrimaryPhone NVARCHAR(50) ); 
+
+CREATE TABLE Appointment_DIM( AppointmentKEY NVARCHAR(50) PRIMARY KEY, PatientKEY NVARCHAR(50) NOT NULL, ProviderKEY NVARCHAR(50) NOT NULL, ClinicKEY NVARCHAR(50) NOT NULL, ServiceKEY NVARCHAR(50) NOT NULL, AptDate DATE NOT NULL, AptTime TIME NOT NULL, AptStatus NVARCHAR(50), BookingMethod NVARCHAR(50), --AptBilling Decimal(10,2), FOREIGN KEY (PatientKEY) REFERENCES Patient_DIM(PatientKEY), FOREIGN KEY (ProviderKEY) REFERENCES HealthProvider_DIM(ProviderKEY), FOREIGN KEY (ClinicKEY) REFERENCES Clinic_DIM(ClinicKEY), FOREIGN KEY (ServiceKEY) REFERENCES HealthService_DIM(ServiceKEY) ); 
+
+CREATE TABLE Inventory_DIM( InventoryKEY NVARCHAR(50) PRIMARY KEY, ClinicKEY NVARCHAR(50), ItemName NVARCHAR(50), QuantityAvailable INT, QuantityUsed INT, QuantityWasted INT, InventoryDate DATE, FOREIGN KEY (ClinicKEY) REFERENCES Clinic_DIM(ClinicKEY), ); 
+
+CREATE TABLE IncidentLogs_DIM( IncidentKEY NVARCHAR(50) PRIMARY KEY, ClinicKEY NVARCHAR(50), IncidentDate DATE, IncidentShift NVARCHAR(5), IncidentType NVARCHAR(50), IncidentNotes NVARCHAR(50), FOREIGN KEY (ClinicKEY) REFERENCES Clinic_DIM(ClinicKEY), ); 
+
+CREATE TABLE Clinic_FACT( ProviderKEY NVARCHAR(50), AppointmentKEY NVARCHAR(50), ClinicKEY NVARCHAR(50), PatientKEY NVARCHAR(50), ServiceKEY NVARCHAR(50), InventoryKEY NVARCHAR(50), --IncidentKEY NVARCHAR(20), AptCost INT, FOREIGN KEY (AppointmentKEY) REFERENCES Appointment_DIM(AppointmentKEY), FOREIGN KEY (ProviderKEY) REFERENCES HealthProvider_DIM(ProviderKEY), FOREIGN KEY (ClinicKEY) REFERENCES Clinic_DIM(ClinicKEY), FOREIGN KEY (PatientKEY) REFERENCES Patient_DIM(PatientKEY), FOREIGN KEY (ServiceKEY) REFERENCES HealthService_DIM(ServiceKEY), FOREIGN KEY (InventoryKEY) REFERENCES Inventory_DIM(InventoryKEY) ); 
+
+-- ETL INSERT INTO Clinic_DIM(ClinicKEY, ClinicName, ClinicStreet, ClinicCity, ClinicState, ClinicZipCode) SELECT ClinicID, ClinicName, ClinicStreet, ClinicCity, ClinicState, ClinicZipCode FROM Clinic; 
+
+INSERT INTO HealthProvider_DIM(ProviderKEY, ProviderName, Specialty, ClinicKEY) SELECT ProviderID, ProviderName, Specialty, ClinicID FROM HealthProvider; 
+
+INSERT INTO HealthService_DIM(ServiceKEY, ServiceName, ServicePrice) SELECT ServiceID, ServiceName, ServicePrice FROM HealthService; 
+
+INSERT INTO Patient_DIM(PatientKEY, PatientFName, PatientLName, PatientDOB, PatientGender, PatientZipCode) SELECT PatientID, PatientFname, PatientLName, PatientDOB, PatientGender, PatientZipCode FROM Patient; 
+
+INSERT INTO Appointment_DIM(AppointmentKEY, PatientKEY, ProviderKEY, ClinicKEY, ServiceKEY, AptDate, AptTime, AptStatus, BookingMethod) SELECT AppointmentID, PatientID, ProviderID, ClinicID, ServiceID, AptDate, AptTime, AptStatus, BookingMethod FROM Appointment; 
+
+INSERT INTO Inventory_DIM(InventoryKEY, ClinicKEY, ItemName, QuantityAvailable, QuantityUsed, QuantityWasted, InventoryDate) SELECT InventoryID, ClinicID, ItemName, QuantityAvailable, QuantityUsed, QuantityWasted, InventoryDate FROM Inventory; 
+
+INSERT INTO Clinic_FACT(ProviderKEY, AppointmentKEY, ClinicKEY, PatientKEY, ServiceKEY, InventoryKEY, AptCost) SELECT ProviderKEY, AppointmentKEY, APT.ClinicKEY, PatientKEY, APT.ServiceKEY, InventoryKEY, ServicePrice FROM Appointment_DIM APT JOIN HealthService_DIM HS ON APT.ServiceKEY = HS.ServiceKEY JOIN Inventory_DIM I ON I.ClinicKEY = APT.ClinicKEY; 
